@@ -1,0 +1,192 @@
+<!-- Created by Erion Nezha — © 2026 All rights reserved -->
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Online Shop + Admin — Demo</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f4f6fb;color:#2d3436}
+.topbar{background:#1e272e;color:#fff;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5}
+.topbar nav{display:flex;gap:8px}
+.topbar nav button{background:#485460;border:none;color:#fff;padding:9px 18px;border-radius:8px;cursor:pointer;font-weight:600}
+.topbar nav button.active{background:#0fbcf9;color:#1e272e}
+.sim{background:#fff3cd;border-bottom:2px solid #fbc531;padding:10px 20px;font-size:.85rem;color:#856404;text-align:center}
+.view{display:none}.view.active{display:block}
+/* SHOP */
+.cats{display:flex;gap:8px;justify-content:center;padding:16px;flex-wrap:wrap}
+.cats button{background:#fff;border:1px solid #dfe4ea;padding:8px 18px;border-radius:20px;cursor:pointer}
+.cats button.active{background:#1e272e;color:#fff}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;padding:0 20px 40px;max-width:1100px;margin:0 auto}
+.card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px #0001;display:flex;flex-direction:column}
+.thumb{height:140px;display:flex;align-items:center;justify-content:center;font-size:3rem;background:linear-gradient(135deg,#e8f4fd,#f4f6fb)}
+.card .b{padding:12px;flex:1;display:flex;flex-direction:column}
+.card h3{font-size:.9rem;margin:4px 0}
+.card .c{font-size:.72rem;color:#8395a7;text-transform:uppercase}
+.card .p{color:#0984e3;font-weight:800;margin:8px 0}
+.card button{margin-top:auto;background:#1e272e;color:#fff;border:none;padding:10px;border-radius:8px;cursor:pointer;font-weight:600}
+.cartbar{position:fixed;bottom:16px;right:16px;background:#0fbcf9;color:#1e272e;font-weight:800;border:none;padding:14px 22px;border-radius:30px;cursor:pointer;box-shadow:0 4px 14px #0003;z-index:6}
+/* ADMIN */
+.admin{display:flex;min-height:80vh}
+.side{width:210px;background:#1e272e;color:#dfe4ea;padding:16px 0;flex-shrink:0}
+.side button{display:block;width:100%;text-align:left;background:none;border:none;color:#dfe4ea;padding:12px 20px;cursor:pointer;font-size:.9rem}
+.side button.active{background:#0fbcf9;color:#1e272e;font-weight:700}
+.apanel{flex:1;padding:20px;overflow-x:auto}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
+.stat{background:#fff;border-radius:10px;padding:16px;box-shadow:0 2px 6px #0001}
+.stat .v{font-size:1.5rem;font-weight:800;color:#1e272e}
+.stat .l{font-size:.78rem;color:#8395a7}
+table{width:100%;background:#fff;border-collapse:collapse;border-radius:10px;overflow:hidden;box-shadow:0 2px 6px #0001;font-size:.85rem}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid #f1f2f6}
+th{background:#1e272e;color:#fff}
+.ok{background:#d4edda;color:#155724;padding:3px 10px;border-radius:12px;font-size:.75rem;font-weight:700}
+.apage{display:none}.apage.active{display:block}
+h2.sec{margin:0 0 12px;font-size:1.15rem}
+/* CART MODAL */
+.modal{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center;z-index:20;padding:16px}
+.modal.show{display:flex}
+.mbox{background:#fff;border-radius:14px;max-width:460px;width:100%;padding:22px;max-height:85vh;overflow-y:auto}
+.ci{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f1f2f6;font-size:.88rem}
+.ci .n{flex:1}.ci .p{font-weight:700;color:#0984e3;white-space:nowrap}
+.qty button{background:#f1f2f6;border:none;width:24px;height:24px;border-radius:6px;cursor:pointer;font-weight:700}
+.mbox .tot{font-weight:800;font-size:1.05rem;display:flex;justify-content:space-between;margin:12px 0}
+.mbox .go{width:100%;background:#00b894;color:#fff;border:none;padding:12px;border-radius:8px;font-weight:700;cursor:pointer}
+.mbox .x{float:right;background:none;border:none;font-size:1.2rem;cursor:pointer}
+.done{text-align:center;padding:20px}
+footer{text-align:center;padding:16px;color:#8395a7;font-size:.82rem}
+</style>
+</head>
+<body>
+<div class="topbar">
+<div><strong>🏬 OnlineShop</strong></div>
+<nav>
+<button id="b-shop" class="active" onclick="view('shop')">🛍️ Dyqani</button>
+<button id="b-admin" onclick="view('admin')">🔧 Admin</button>
+</nav>
+</div>
+<div class="sim">⚠️ <strong>SIMULIM</strong> — origjinali është sistem PHP + MySQL. Produktet, çmimet dhe porositë janë reale, nga <code>database/onlineshop.sql</code>.</div>
+
+<div id="v-shop" class="view active">
+<div class="cats" id="cats"></div>
+<div class="grid" id="grid"></div>
+<button class="cartbar" onclick="openCart()">🛒 Shporta · <span id="cc">0</span></button>
+</div>
+
+<div id="v-admin" class="view">
+<div class="admin">
+<div class="side">
+<button class="active" onclick="apage('dash',this)">📊 Dashboard</button>
+<button onclick="apage('prod',this)">📦 Produktet</button>
+<button onclick="apage('ord',this)">🧾 Porositë</button>
+</div>
+<div class="apanel">
+<div id="a-dash" class="apage active">
+<h2 class="sec">📊 Dashboard</h2>
+<div class="stats">
+<div class="stat"><div class="v" id="st-prod">0</div><div class="l">Produkte</div></div>
+<div class="stat"><div class="v" id="st-ord">0</div><div class="l">Porosi</div></div>
+<div class="stat"><div class="v" id="st-rev">Rs 0</div><div class="l">Xhiro (porosi të përfunduara)</div></div>
+<div class="stat"><div class="v">3</div><div class="l">Kategori</div></div>
+</div>
+<p style="color:#8395a7;font-size:.88rem">Të dhënat vijnë nga databaza reale <code>onlineshop.sql</code> (tabela <code>products</code> dhe <code>orders</code>).</p>
+</div>
+<div id="a-prod" class="apage">
+<h2 class="sec">📦 Produktet</h2>
+<table><tr><th>ID</th><th>Produkti</th><th>Kategoria</th><th>Çmimi</th></tr><tbody id="ptb"></tbody></table>
+</div>
+<div id="a-ord" class="apage">
+<h2 class="sec">🧾 Porositë</h2>
+<table><tr><th>ID</th><th>Produkti</th><th>Sasia</th><th>Totali</th><th>Statusi</th></tr><tbody id="otb"></tbody></table>
+</div>
+</div>
+</div>
+</div>
+
+<div class="modal" id="mcart"><div class="mbox">
+<button class="x" onclick="closeCart()">✖</button>
+<h2>🛒 Shporta</h2><div id="citems" style="margin-top:10px"></div>
+<div class="tot"><span>Totali:</span><span id="ctot">Rs 0</span></div>
+<button class="go" onclick="checkout()">Paguaj (demo)</button>
+<div id="cok" class="done" style="display:none"><div style="font-size:2.5rem">✅</div><p id="cokmsg"></p></div>
+</div></div>
+
+<footer>Krijuar nga <strong>Erion Nezha</strong> — © 2026</footer>
+<script>
+const P=[
+[1,"Samsung galaxy s7 edge",5000,"Elektronikë","📱"],
+[2,"iPhone 5s",25000,"Elektronikë","📱"],
+[3,"iPad air 2",30000,"Elektronikë","📱"],
+[6,"Samsung Laptop r series",35000,"Elektronikë","💻"],
+[7,"Laptop Pavillion",50000,"Elektronikë","💻"],
+[8,"Sony Xperia",40000,"Elektronikë","📱"],
+[41,"Headphones",250,"Elektronikë","🎧"],
+[31,"LED TV",20000,"Elektronikë","📺"],
+[10,"Red Ladies dress",1000,"Veshje","👗"],
+[16,"Sweter for men",600,"Veshje","🧥"],
+[19,"Formal Coat",3000,"Veshje","🧥"],
+[21,"T shirt",800,"Veshje","👕"],
+[26,"Book Shelf",2500,"Shtëpi","📚"],
+[27,"Refrigerator",35000,"Shtëpi","🧊"],
+[32,"Microwave Oven",3500,"Shtëpi","♨️"],
+[33,"Mixer Grinder",2500,"Shtëpi","🌀"]];
+const ORDERS=[
+{id:1,pid:7,qty:1,trx:"07M47684BS5725041",st:"Completed"},
+{id:2,pid:2,qty:1,trx:"07M47684BS5725041",st:"Completed"}];
+const CATS=["Të gjitha","Elektronikë","Veshje","Shtëpi"];
+let cart={},F="Të gjitha";
+const fmt=n=>"Rs "+n.toLocaleString("en-US");
+const byId=id=>P.find(p=>p[0]===id);
+function view(v){
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  document.getElementById('v-'+v).classList.add('active');
+  document.getElementById('b-shop').classList.toggle('active',v==='shop');
+  document.getElementById('b-admin').classList.toggle('active',v==='admin');
+  window.scrollTo(0,0);
+}
+function apage(p,btn){
+  document.querySelectorAll('.apage').forEach(x=>x.classList.remove('active'));
+  document.getElementById('a-'+p).classList.add('active');
+  document.querySelectorAll('.side button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function renderCats(){document.getElementById('cats').innerHTML=CATS.map(c=>`<button class="${c===F?'active':''}" onclick="setF('${c}')">${c}</button>`).join('');}
+function setF(c){F=c;renderCats();renderGrid();}
+function renderGrid(){
+  document.getElementById('grid').innerHTML=P.filter(p=>F==="Të gjitha"||p[3]===F).map(p=>`
+  <div class="card"><div class="thumb">${p[4]}</div><div class="b">
+  <span class="c">${p[3]}</span><h3>${p[1]}</h3><div class="p">${fmt(p[2])}</div>
+  <button onclick="add(${p[0]})">Shto në shportë</button></div></div>`).join('');
+}
+function add(id){cart[id]=(cart[id]||0)+1;updCart();}
+function dq(id,d){cart[id]=(cart[id]||0)+d;if(cart[id]<=0)delete cart[id];updCart();renderCItems();}
+function updCart(){document.getElementById('cc').textContent=Object.values(cart).reduce((a,b)=>a+b,0);}
+function total(){return Object.entries(cart).reduce((a,[id,q])=>a+byId(+id)[2]*q,0);}
+function openCart(){renderCItems();document.getElementById('cok').style.display='none';document.getElementById('mcart').classList.add('show');}
+function closeCart(){document.getElementById('mcart').classList.remove('show');}
+function renderCItems(){
+  const ids=Object.keys(cart);
+  document.getElementById('citems').innerHTML=ids.length?ids.map(id=>{const p=byId(+id),q=cart[id];return `
+  <div class="ci"><span class="n">${p[4]} ${p[1]}</span>
+  <span class="qty"><button onclick="dq(${id},-1)">−</button> ${q} <button onclick="dq(${id},1)">+</button></span>
+  <span class="p">${fmt(p[2]*q)}</span></div>`;}).join('')
+  :'<p style="color:#a4b0be;text-align:center;padding:20px">Shporta është bosh.</p>';
+  document.getElementById('ctot').textContent=fmt(total());
+}
+function checkout(){
+  if(!Object.keys(cart).length){alert('Shporta është bosh!');return;}
+  const t=fmt(total());
+  document.getElementById('cokmsg').textContent=`Pagesa ${t} u krye me sukses. (Demo — pa transaksion real.)`;
+  document.getElementById('cok').style.display='block';
+  cart={};updCart();renderCItems();
+}
+// admin tables
+document.getElementById('ptb').innerHTML=P.map(p=>`<tr><td>${p[0]}</td><td>${p[4]} ${p[1]}</td><td>${p[3]}</td><td>${fmt(p[2])}</td></tr>`).join('');
+document.getElementById('otb').innerHTML=ORDERS.map(o=>{const p=byId(o.pid);return `<tr><td>#${o.id}</td><td>${p[4]} ${p[1]}</td><td>${o.qty}</td><td>${fmt(p[2]*o.qty)}</td><td><span class="ok">${o.st}</span></td></tr>`;}).join('');
+document.getElementById('st-prod').textContent=P.length;
+document.getElementById('st-ord').textContent=ORDERS.length;
+document.getElementById('st-rev').textContent=fmt(ORDERS.reduce((a,o)=>a+byId(o.pid)[2]*o.qty,0));
+renderCats();renderGrid();updCart();
+</script>
+</body>
+</html>
